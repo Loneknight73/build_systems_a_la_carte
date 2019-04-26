@@ -1,4 +1,4 @@
-package org.bsalc
+package bsalc
 
 case class Store[I, K, V] (info: I, values: K => V) // Info, Key, Value
 
@@ -25,7 +25,7 @@ trait Hash[V] {
 }
 
 object TestStore extends App {
-  import org.bsalc.Store._
+  import bsalc.Store._
 
   val s = initialise("a store", {k: String => k match {
     case "A1" => 10
