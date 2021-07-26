@@ -33,3 +33,8 @@ The difficulties for me were many, mainly related to:
 
 On the other hand this exercise is (and hopefully will be) very helpful for me to learn more
 about functional programming. Polite comments and suggestions are welcome.
+
+# Status
+
+Currently only 'busy' and 'make' build systems have been implemented, with minimal testing.
+
