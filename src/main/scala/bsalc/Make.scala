@@ -59,22 +59,24 @@ object Make {
          */
         def run[F[_] : MonadStateMakeInfo](fetch: K => F[V]): F[V] = {
           val ev = summon[MonadStateMakeInfo[F]]
-          val temp = ev.get
-          val (now: Time, modTimes: Map[K, Time]) = temp
-          val dirty = modTimes.get(key) match {
-            case None => true
-            case Some(time) => any((d: K) => modTimes.get(d).map(_ > time).get, dependencies(task))
-          }
-          if (!dirty) then
-            ev.monad.pure(value)
-          else {
-            ev.set(now + 1, modTimes + (key -> now))
-            task.run(fetch)(ev.monad)
-          }
+          val evMonad = ev.monad
+          evMonad.flatMap(ev.get)((now, modTimes) =>
+            val dirty = modTimes.get(key) match {
+              case None => true
+              case Some(time) => any((d: K) => modTimes.get(d).map(_ > time).get, dependencies(task))
+            }
+            if (!dirty) then
+              ev.monad.pure(value)
+            else {
+              ev.set(now + 1, modTimes + (key -> now))
+              task.run(fetch)(ev.monad)
+            }
+          )
         }
       }
     }
   }
+
 
   def topological[I, K: Ordering, V](): Scheduler[Applicative, I, I, K, V] = {
     (rebuilder: Rebuilder[Applicative, I, K, V]) => {
@@ -96,10 +98,13 @@ object Make {
         }
 
         def order: List[K] = topSort(reachable(dep, target))
-        def dep: K => List[K] = { tasks(_) match
+
+        def dep: K => List[K] = {
+          tasks(_) match
             case None => Nil
             case Some(task) => dependencies(task)
         }
+
         order.traverse(build).runS(store).value
       }
     }
@@ -111,7 +116,7 @@ object Make {
     y(x)
   }
 
-  def reachable[K: Ordering: Identifiable](dep: K => List[K], target: K): DGraph[K] = {
+  def reachable[K: Ordering : Identifiable](dep: K => List[K], target: K): DGraph[K] = {
     val depKeys = dep(target)
     val targetDepList = depKeys.map(target --> _)
     val targetDepGraph = Graph.fromEdges(targetDepList)
@@ -125,7 +130,7 @@ object Make {
   }
 
   def topSort[K: Ordering](g: DGraph[K]): List[K] = {
-    g.topologicalSort.map(_.value)
+    g.topologicalSort.map(_.value).reverse
   }
 
   def liftStore[I, A, K, V](x: State[I, A]): State[Store[I, K, V], A] = {
