@@ -77,7 +77,6 @@ object Make {
     }
   }
 
-
   def topological[I, K: Ordering, V](): Scheduler[Applicative, I, I, K, V] = {
     (rebuilder: Rebuilder[Applicative, I, K, V]) => {
       // TODO: can these be curried?
