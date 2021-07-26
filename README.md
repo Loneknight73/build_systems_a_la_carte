@@ -13,7 +13,7 @@ The project is meant for self-study, and, as I am not a Scala expert, much of it
 questionable at best, and needs heavy refactoring.
 The code organization is also not ideal.
 The primary goal was to arrive at something that could run in Scala and replicate some tests 
-mentioned in the paper, at the same time making translation as close to the original as possible
+mentioned in the paper, at the same time making the translation as close to the original as possible
 (e.g.: Store was written in functional style, like in the Haskell code, even if an OO implementation
 would have been more idiomatic in Scala).
 The secondary goal is to arrive at a good level of conciseness (even if it is likely not possible 
